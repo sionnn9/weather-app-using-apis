@@ -1,11 +1,27 @@
 "use client";
 import "/src/app/globals.css"; // Ensure this file contains Tailwind directives
 import { useState } from "react";
+import { useEffect } from "react";
 import Card from "@/components/card"; // Ensure Card component is correctly imported
 
 export default function Home() {
   const [val, setVal] = useState("");
   const [displayValue, setDisplayValue] = useState("");
+
+  const api = "db68a74578b13f949b41ec6b9a63721d";
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${val}&appid=${api}`;
+  async function getData(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.error("Error fetching data:", e);
+    }
+  }
 
   const change = (event) => {
     setVal(event.target.value);
@@ -13,6 +29,9 @@ export default function Home() {
 
   const handleButtonClick = () => {
     setDisplayValue(val);
+    getData(url).then((data) => {
+      console.log(data);
+    });
   };
 
   return (
