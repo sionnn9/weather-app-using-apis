@@ -1,22 +1,24 @@
 "use client";
 import "/src/app/globals.css"; // Ensure this file contains Tailwind directives
 import { useState } from "react";
-import { useEffect } from "react";
 import Card from "@/components/card"; // Ensure Card component is correctly imported
 
 export default function Home() {
-  const [val, setVal] = useState("");
   const [displayValue, setDisplayValue] = useState("");
+  const [val, setVal] = useState("");
 
   const api = "db68a74578b13f949b41ec6b9a63721d";
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${val}&appid=${api}`;
-  async function getData(url) {
+
+  async function getData(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api}`;
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        setDisplayValue("Enter a valid city");
+        throw new Error("Response not okay");
       }
       const data = await response.json();
+      setDisplayValue(data.name); // Assuming you want to display the city name
       return data;
     } catch (e) {
       console.error("Error fetching data:", e);
@@ -28,16 +30,18 @@ export default function Home() {
   };
 
   const handleButtonClick = () => {
-    setDisplayValue(val);
-    getData(url).then((data) => {
-      console.log(data);
-    });
+    if (val.trim()) {
+      getData(val).then((data) => {
+        console.log(data);
+      });
+    } else {
+      setDisplayValue("Enter a city");
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen overflow-x-hidden bg-sky-300">
       <h1 className="mb-10 text-2xl font-semibold">Weather App</h1>
-
       <div className="flex items-center space-x-4">
         <input
           onChange={change}
@@ -51,7 +55,6 @@ export default function Home() {
           Enter
         </button>
       </div>
-      <h1 className="mt-4 text-lg">{displayValue}</h1>
       <Card name={displayValue}></Card>
     </div>
   );
