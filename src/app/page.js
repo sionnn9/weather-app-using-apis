@@ -11,7 +11,10 @@ export default function Home() {
     temp: null,
     humidity: null,
     description: "",
+    id: null,
   });
+  let [cels, setCels] = useState(null);
+  const [weatherIcon, setWeatherIcon] = useState("");
   const [isCardVisible, setIsCardVisible] = useState(false);
 
   const api = "db68a74578b13f949b41ec6b9a63721d";
@@ -22,6 +25,15 @@ export default function Home() {
       const response = await fetch(url);
       if (!response.ok) {
         setDisplayValue("Enter a valid city");
+        setWeatherData({
+          city: "",
+          temp: null,
+          humidity: null,
+          description: "",
+          id: null,
+        });
+        setCels("");
+        setWeatherIcon("");
         throw new Error("Response not okay");
       }
       const data = await response.json();
@@ -45,8 +57,16 @@ export default function Home() {
       });
     } else {
       setIsCardVisible(true);
-
       setDisplayValue("Enter a city");
+      setWeatherData({
+        city: "",
+        temp: null,
+        humidity: null,
+        description: "",
+        id: null,
+      });
+      setCels("");
+      setWeatherIcon("");
     }
   };
   let getWeatherData = (data) => {
@@ -56,11 +76,35 @@ export default function Home() {
       weather: [{ description, id }],
     } = data;
     setWeatherData({ city, temp, humidity, description, id });
+    let celsiusTemp = (temp - 273).toFixed(1);
+    setCels(celsiusTemp);
+    console.log(celsiusTemp);
+    setWeatherIcon(weatherEmoji(id));
   };
 
+  const weatherEmoji = (id) => {
+    switch (true) {
+      case id >= 200 && id < 300:
+        return "⛈️";
+      case id >= 300 && id < 400:
+        return "🌦️";
+      case id >= 500 && id < 600:
+        return "🌧️";
+      case id >= 600 && id < 700:
+        return "❄️";
+      case id >= 700 && id < 800:
+        return "🌫️";
+      case id == 800:
+        return "🌞";
+      case id >= 801 && id < 810:
+        return "☁️";
+      default:
+        return "👾";
+    }
+  };
   return (
-    <div className="flex flex-col items-center justify-center h-screen overflow-x-hidden bg-sky-300">
-      <h1 className="mb-10 text-2xl font-semibold">Weather App</h1>
+    <div className="flex flex-col items-center justify-center h-screen overflow-x-hidden bg-[#2f65acfa]">
+      <h1 className="mb-10 text-4xl underline font-semibold">Weather App</h1>
       <div className="flex items-center space-x-4">
         <input
           onChange={change}
@@ -81,7 +125,8 @@ export default function Home() {
         name={displayValue}
         description={weatherData.description}
         humidity={weatherData.humidity}
-        temp={weatherData.temp}
+        temp={cels}
+        icon={weatherIcon}
       ></Card>
     </div>
   );
