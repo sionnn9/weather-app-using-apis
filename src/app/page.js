@@ -6,6 +6,13 @@ import Card from "@/components/card"; // Ensure Card component is correctly impo
 export default function Home() {
   const [displayValue, setDisplayValue] = useState("");
   const [val, setVal] = useState("");
+  const [weatherData, setWeatherData] = useState({
+    city: "",
+    temp: null,
+    humidity: null,
+    description: "",
+  });
+  const [isCardVisible, setIsCardVisible] = useState(false);
 
   const api = "db68a74578b13f949b41ec6b9a63721d";
 
@@ -18,6 +25,8 @@ export default function Home() {
         throw new Error("Response not okay");
       }
       const data = await response.json();
+      getWeatherData(data);
+      setIsCardVisible(true);
       setDisplayValue(data.name); // Assuming you want to display the city name
       return data;
     } catch (e) {
@@ -35,8 +44,18 @@ export default function Home() {
         console.log(data);
       });
     } else {
+      setIsCardVisible(true);
+
       setDisplayValue("Enter a city");
     }
+  };
+  let getWeatherData = (data) => {
+    const {
+      name: city,
+      main: { temp, humidity },
+      weather: [{ description, id }],
+    } = data;
+    setWeatherData({ city, temp, humidity, description, id });
   };
 
   return (
@@ -55,7 +74,15 @@ export default function Home() {
           Enter
         </button>
       </div>
-      <Card name={displayValue}></Card>
+      <Card
+        className={`transition-opacity duration-300 ${
+          isCardVisible ? "opacity-100" : "opacity-0"
+        }`}
+        name={displayValue}
+        description={weatherData.description}
+        humidity={weatherData.humidity}
+        temp={weatherData.temp}
+      ></Card>
     </div>
   );
 }
